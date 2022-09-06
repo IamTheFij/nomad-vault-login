@@ -1,0 +1,50 @@
+---
+kind: pipeline
+name: publish
+
+trigger:
+  event:
+    - push
+    - tag
+  refs:
+    - refs/heads/master
+    - refs/tags/v*
+
+steps:
+  - name: push images
+    image: thegeeklab/drone-docker-buildx
+    settings:
+      repo: iamthefij/nomad-vault-login
+      auto_tag: true
+      platforms:
+        - linux/amd64
+        - linux/arm64
+        - linux/arm
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+
+---
+kind: pipeline
+name: notify
+
+depends_on:
+  - publish
+
+trigger:
+  status:
+    - failure
+
+steps:
+
+  - name: notify
+    image: drillster/drone-email
+    settings:
+      host:
+        from_secret: SMTP_HOST  # pragma: whitelist secret
+      username:
+        from_secret: SMTP_USER  # pragma: whitelist secret
+      password:
+        from_secret: SMTP_PASS  # pragma: whitelist secret
+      from: drone@iamthefij.com
