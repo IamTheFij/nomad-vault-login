@@ -31,9 +31,10 @@ def login():
 <html>
 <body>
 <form action="/login" method="POST">
-Username <input type="text" name="username"/>
-Password <input type="password" name="password"/>
-<input type="submit" value="Submit"/>
+<p>Username <input type="text" name="username"/></p>
+<p>Password <input type="password" name="password"/></p>
+<p>Role <input type="text" name="role" value="admin"/></p>
+<p><input type="submit" value="Submit"/></p>
 </form>
 </html>
 """
@@ -42,13 +43,15 @@ Password <input type="password" name="password"/>
         username, password = request.form["username"], request.form["password"]
         client.auth_userpass(username, password)
         assert client.is_authenticated()
-        nomad_creds = client.read(f"nomad/creds/{NOMAD_ROLE}")
+
+        role = request.form.get("role")
+        nomad_creds = client.read(f"nomad/creds/{role or NOMAD_ROLE}")
         nomad_token = nomad_creds["data"]["secret_id"]
         return f"""
 <html><head>
-<script>localStorage.setItem("nomadTokenSecret", "{nomad_token}");</script>
+<script>localStorage.setItem("nomadTokenSecret", "{nomad_token}"); window.location.replace("/ui/settings/tokens");</script>
 </head>
-<body>Logged in. Go back now.</body></html>
+<body>Logged in. Go <a href="/ui/settings/tokens">back to Nomad</a></body></html>
 """
 
 
