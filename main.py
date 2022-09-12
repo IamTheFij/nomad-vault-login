@@ -5,6 +5,9 @@ from flask import request
 from hvac import Client
 
 
+BIND_HOST = os.getenv("BIND_HOST", "0.0.0.0")
+BIND_PORT = int(os.getenv("BIND_PORT", "5000"))
+
 VAULT_ADDR = os.getenv("VAULT_ADDR", "http://127.0.0.1:8200")
 NOMAD_ROLE = os.getenv("NOMAD_ROLE", "admin")
 
@@ -12,7 +15,7 @@ NOMAD_ROLE = os.getenv("NOMAD_ROLE", "admin")
 app = Flask(__name__)
 
 
-@app.route('/')
+@app.route("/")
 def root():
     # TODO: Render a basic page that checks for existance of token in local storage and displays form
     return f"""
@@ -55,4 +58,4 @@ def login():
 """
 
 
-app.run(host="0.0.0.0", port=5000)
+app.run(host=BIND_HOST, port=BIND_PORT)
