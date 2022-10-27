@@ -44,7 +44,7 @@ def login():
     elif request.method == "POST":
         client = Client(VAULT_ADDR)
         username, password = request.form["username"], request.form["password"]
-        client.auth_userpass(username, password)
+        client.auth.userpass.login(username, password)
         assert client.is_authenticated()
 
         role = request.form.get("role")
