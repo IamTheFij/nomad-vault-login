@@ -1,2 +1,2 @@
 flask
-hvac
+hvac<1.0.0
