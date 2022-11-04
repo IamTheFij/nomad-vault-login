@@ -1,6 +1,7 @@
 import os
 
 from flask import Flask
+from flask import Response
 from flask import request
 from hvac import Client
 
@@ -42,14 +43,17 @@ def login():
 </html>
 """
     elif request.method == "POST":
-        client = Client(VAULT_ADDR)
         username, password = request.form["username"], request.form["password"]
+
+        client = Client(VAULT_ADDR)
         client.auth.userpass.login(username, password)
-        assert client.is_authenticated()
+        if not client.is_authenticated():
+            return Response(response="Unauthorized", status=401)
 
         role = request.form.get("role")
         nomad_creds = client.read(f"nomad/creds/{role or NOMAD_ROLE}")
         nomad_token = nomad_creds["data"]["secret_id"]
+
         return f"""
 <html><head>
 <script>localStorage.setItem("nomadTokenSecret", "{nomad_token}"); window.location.replace("/ui/settings/tokens");</script>
