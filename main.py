@@ -4,6 +4,7 @@ from flask import Flask
 from flask import Response
 from flask import request
 from hvac import Client
+from hvac.exceptions import InvalidRequest
 
 
 BIND_HOST = os.getenv("BIND_HOST", "0.0.0.0")
@@ -46,7 +47,11 @@ def login():
         username, password = request.form["username"], request.form["password"]
 
         client = Client(VAULT_ADDR)
-        client.auth.userpass.login(username, password)
+        try:
+            client.auth.userpass.login(username, password)
+        except InvalidRequest:
+            return Response(response="Unauthorized", status=401)
+
         if not client.is_authenticated():
             return Response(response="Unauthorized", status=401)
 
